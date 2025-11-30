@@ -1,14 +1,19 @@
-# Name this file assignment4.py when you submit
+import os
 
-class bag_of_words_model:
+class BagOfWordsModel:
 	def __init__(self, directory):
 		# directory is the full path to a directory containing trials through state space
-		doc_words = []
-		with open(directory, newline='', mode='r') as f:
-			content = f.read()
-			doc_words = content.split()
+		docWords = []
 
-		print(doc_words)
+		fileNames = os.listdir(directory)
+		files = [f for f in fileNames if f.endswith(".txt") and os.path.isfile(os.path.join(directory, f))]
+		for file in files:
+			filePath = os.path.join(directory, file)
+			with open(filePath, newline='', mode='r') as f:
+				content = f.read()
+				docWords += content.split()
+
+		print(docWords)
 		# Return nothing
 
 
@@ -30,4 +35,6 @@ class bag_of_words_model:
 		# return predicted_label, scores
 
 if __name__ == '__main__':
-	bagOfWords = bag_of_words_model("./Examples/Example0/training_documents/document0.txt")
+	bagOfWords0 = BagOfWordsModel("./Examples/Example0/training_documents")
+	bagOfWords1 = BagOfWordsModel("./Examples/Example1/training_documents")
+	bagOfWords2 = BagOfWordsModel("./Examples/Example2/training_documents")
