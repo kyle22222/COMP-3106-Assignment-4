@@ -37,7 +37,7 @@ class BagOfWordsModel:
         total_words = len(tokens)
 
         if total_words == 0:
-            return [0.0] * len(self.vocabulary)
+            return [0.0] * len(self.idf)
 
         doc_word_counts = {}
         for token in tokens:
@@ -45,11 +45,11 @@ class BagOfWordsModel:
 
         tf_idf_vector = []
 
-        for i, term in enumerate(self.vocabulary):
+        for term in self.idf:
             term_count = doc_word_counts.get(term, 0)
             tf = term_count / total_words
 
-            idf = self.idf[i]
+            idf = self.idf[term]
 
             tf_idf_vector.append(tf * idf)
 
