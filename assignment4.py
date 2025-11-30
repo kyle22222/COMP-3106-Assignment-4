@@ -9,9 +9,29 @@ class bag_of_words_model:
 
 
   def tf_idf(self, document_filepath):
-    # document_filepath is the full file path to a test document
+    with open(document_filepath, 'r') as f:
+        content = f.read()
 
-    # Return the term frequency-inverse document frequency vector for the document
+    tokens = content.split()
+    total_words = len(tokens)
+
+    if  total_words == 0:
+        return [0.0] * len(self.vocabulary)
+
+    doc_word_counts = {}
+    for token in tokens:
+        doc_word_counts[token] = doc_word_counts.get(token, 0) + 1
+
+    tf_idf_vector = []
+
+    for i, term in enumerate(self.vocabulary):
+        term_count = doc_word_counts.get(term, 0)
+        tf = term_count / total_words
+
+        idf = self.idf[i]
+
+        tf_idf_vector.append(tf * idf)
+
     return tf_idf_vector
 
 
