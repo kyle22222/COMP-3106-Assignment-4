@@ -1,11 +1,20 @@
-# Name this file assignment4.py when you submit
+import os
 
-class bag_of_words_model:
+class BagOfWordsModel:
+	def __init__(self, directory):
+		# directory is the full path to a directory containing trials through state space
+		docWords = []
 
-  def __init__(self, directory):
-    # directory is the full path to a directory containing trials through state space
-	
-    # Return nothing
+		fileNames = os.listdir(directory)
+		files = [f for f in fileNames if f.endswith(".txt") and os.path.isfile(os.path.join(directory, f))]
+		for file in files:
+			filePath = os.path.join(directory, file)
+			with open(filePath, newline='', mode='r') as f:
+				content = f.read()
+				docWords += content.split()
+
+		print(docWords)
+		# Return nothing
 
 
   def tf_idf(self, document_filepath):
@@ -35,12 +44,17 @@ class bag_of_words_model:
     return tf_idf_vector
 
 
-  def predict(self, document_filepath, business_weights, entertainment_weights, politics_weights):
-    # document_filepath is the full file path to a test document
-    # business_weights is a list of weights for the business artificial neuron
-    # entertainment_weights is a list of weights for the entertainment artificial neuron
-    # politics_weights is a list of weights for the politics artificial neuron
+	def predict(self, document_filepath, business_weights, entertainment_weights, politics_weights):
+		# document_filepath is the full file path to a test document
+		# business_weights is a list of weights for the business artificial neuron
+		# entertainment_weights is a list of weights for the entertainment artificial neuron
+		# politics_weights is a list of weights for the politics artificial neuron
+		pass
+		# Return the predicted label from the neural network model
+		# Return the score from each neuron
+		# return predicted_label, scores
 
-    # Return the predicted label from the neural network model
-    # Return the score from each neuron
-    return predicted_label, scores
+if __name__ == '__main__':
+	bagOfWords0 = BagOfWordsModel("./Examples/Example0/training_documents")
+	bagOfWords1 = BagOfWordsModel("./Examples/Example1/training_documents")
+	bagOfWords2 = BagOfWordsModel("./Examples/Example2/training_documents")
