@@ -1,19 +1,31 @@
+import math
 import os
 
 class BagOfWordsModel:
 	def __init__(self, directory):
 		# directory is the full path to a directory containing trials through state space
 		docWords = []
+		wordFreq = {}
+		docCount = 0
+		self.idf = {}
 
 		fileNames = os.listdir(directory)
 		files = [f for f in fileNames if f.endswith(".txt") and os.path.isfile(os.path.join(directory, f))]
 		for file in files:
+			docCount += 1
 			filePath = os.path.join(directory, file)
 			with open(filePath, newline='', mode='r') as f:
 				content = f.read()
+				uniqueList = list(set(content.split()))
+				for word in uniqueList:
+					wordFreq[word] = wordFreq.get(word, 0) + 1
 				docWords += content.split()
 
-		print(docWords)
+		wordFreq = dict(sorted(wordFreq.items()))
+		for word in wordFreq:
+			self.idf[word] = math.log(docCount / wordFreq.get(word), 2)
+
+		print(self.idf)
 		# Return nothing
 
 
