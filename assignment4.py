@@ -1,9 +1,7 @@
-import math
-import os
+import math, os
 
 class BagOfWordsModel:
     def __init__(self, directory):
-        # directory is the full path to a directory containing trials through state space
         docWords = []
         wordFreq = {}
         docCount = 0
@@ -25,47 +23,66 @@ class BagOfWordsModel:
         for word in wordFreq:
             self.idf[word] = math.log(docCount / wordFreq.get(word), 2)
 
-        print(self.idf)
-        # Return nothing
-
-
-    def tf_idf(self, document_filepath):
-        with open(document_filepath, 'r') as f:
+    def tf_idf(self, documentFilepath):
+        with open(documentFilepath, 'r') as f:
             content = f.read()
 
         tokens = content.split()
-        total_words = len(tokens)
+        totalWords = len(tokens)
 
-        if total_words == 0:
+        if totalWords == 0:
             return [0.0] * len(self.idf)
 
-        doc_word_counts = {}
+        docWordCounts = {}
         for token in tokens:
-            doc_word_counts[token] = doc_word_counts.get(token, 0) + 1
+            docWordCounts[token] = docWordCounts.get(token, 0) + 1
 
-        tf_idf_vector = []
+        tfIdfVector = []
 
         for term in self.idf:
-            term_count = doc_word_counts.get(term, 0)
-            tf = term_count / total_words
-
+            termCount = docWordCounts.get(term, 0)
+            tf = termCount / totalWords
             idf = self.idf[term]
+            tfIdfVector.append(tf * idf)
 
-            tf_idf_vector.append(tf * idf)
+        return tfIdfVector
 
-        return tf_idf_vector
+    @staticmethod
+    def _dot(weights, x):
+        dotSum = 0
+        for w, tf in zip(weights, x):
+            dotSum += w * tf
+        return dotSum
 
-    def predict(self, document_filepath, business_weights, entertainment_weights, politics_weights):
-        # document_filepath is the full file path to a test document
-        # business_weights is a list of weights for the business artificial neuron
-        # entertainment_weights is a list of weights for the entertainment artificial neuron
-        # politics_weights is a list of weights for the politics artificial neuron
-        pass
-        # Return the predicted label from the neural network model
-        # Return the score from each neuron
-        # return predicted_label, scores
+    @staticmethod
+    def _softmax(scores):
+        maxScore = max(scores)
+        exps = [math.exp(s - maxScore) for s in scores]
+        total = sum(exps)
+        return [e / total for e in exps]
+
+    def predict(self, documentFilepath, businessWeights, entertainmentWeights, politicsWeights):
+        x = self.tf_idf(documentFilepath)
+
+        z1 = self._dot(businessWeights, x)
+        z2 = self._dot(entertainmentWeights, x)
+        z3 = self._dot(politicsWeights, x)
+
+        scores = self._softmax([z1, z2, z3])
+        catStrings = ["business", "entertainment", "politics"]
+        predictedLabel = catStrings[max(range(3), key = lambda k: scores[k])]
+        return predictedLabel, scores
+
+def readNumbers(filepath):
+    with open(filepath, 'r') as f:
+        content = f.read()
+
+    return [float(num.strip()) for num in content.split(',')]
 
 if __name__ == '__main__':
-    bagOfWords0 = BagOfWordsModel("./Examples/Example0/training_documents")
-    bagOfWords1 = BagOfWordsModel("./Examples/Example1/training_documents")
-    bagOfWords2 = BagOfWordsModel("./Examples/Example2/training_documents")
+    for ex in range(3):
+        folder = "./Examples/Example" + str(ex) + "/"
+        cats = [readNumbers(folder + cat + "_weights.txt") for cat in ["business", "entertainment", "politics"]]
+        bagOfWords = BagOfWordsModel(folder + "training_documents")
+        prediction = bagOfWords.predict(folder + "test_document.txt", cats[0], cats[1], cats[2])
+        print(prediction)
